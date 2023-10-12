@@ -13,12 +13,14 @@ import (
 	"github.com/tuneinsight/lattigo/v4/ckks/bootstrapping"
 	"github.com/tuneinsight/lattigo/v4/rlwe"
 	"github.com/tuneinsight/lattigo/v4/utils"
+	"github.com/tuneinsight/lattigo/v4/ring"
 )
 
 var flagShort = flag.Bool("short", false, "run the example with a smaller and insecure ring degree.")
 
 func main() {
-
+	var mul_cnt[10] int
+	mul_cnt[0] = ring.MUL_COUNT
 	flag.Parse()
 
 	// First we define the residual CKKS parameters. This is only a template that will be given
@@ -93,10 +95,12 @@ func main() {
 	decryptor := ckks.NewDecryptor(params, sk)
 	encryptor := ckks.NewEncryptor(params, pk)
 
+	mul_cnt[1] = ring.MUL_COUNT
 	fmt.Println()
 	fmt.Println("Generating bootstrapping keys...")
 	evk := bootstrapping.GenEvaluationKeys(btpParams, params, sk)
 	fmt.Println("Done")
+	mul_cnt[2] = ring.MUL_COUNT
 
 	var btp *bootstrapping.Bootstrapper
 	if btp, err = bootstrapping.NewBootstrapper(params, btpParams, evk); err != nil {
@@ -109,11 +113,13 @@ func main() {
 		valuesWant[i] = utils.RandComplex128(-1, 1)
 	}
 
+	mul_cnt[3] = ring.MUL_COUNT
 	plaintext := encoder.EncodeNew(valuesWant, params.MaxLevel(), params.DefaultScale(), params.LogSlots())
-
+	mul_cnt[4] = ring.MUL_COUNT
 	// Encrypt
+	mul_cnt[5] = ring.MUL_COUNT
 	ciphertext1 := encryptor.EncryptNew(plaintext)
-
+	mul_cnt[6] = ring.MUL_COUNT
 	// Decrypt, print and compare with the plaintext values
 	fmt.Println()
 	fmt.Println("Precision of values vs. ciphertext")
@@ -127,13 +133,20 @@ func main() {
 	// If the ciphertext is is at level one or greater when given to the bootstrapper, this equalization is automatically done.
 	fmt.Println()
 	fmt.Println("Bootstrapping...")
+	mul_cnt[7] = ring.MUL_COUNT
 	ciphertext2 := btp.Bootstrap(ciphertext1)
+	mul_cnt[8] = ring.MUL_COUNT
 	fmt.Println("Done")
 
 	// Decrypt, print and compare with the plaintext values
 	fmt.Println()
 	fmt.Println("Precision of ciphertext vs. Bootstrap(ciphertext)")
 	printDebug(params, ciphertext2, valuesTest1, decryptor, encoder)
+	fmt.Printf("----------------MUL COUNT----------------\n")
+	fmt.Printf("GenEvaluationKeys: %d (%d --> %d)\n",mul_cnt[2]-mul_cnt[1], mul_cnt[1], mul_cnt[2])
+	fmt.Printf("EncodeNew        : %d (%d --> %d)\n",mul_cnt[4]-mul_cnt[3], mul_cnt[3], mul_cnt[4])
+	fmt.Printf("EncryptNew       : %d (%d --> %d)\n",mul_cnt[6]-mul_cnt[5], mul_cnt[5], mul_cnt[6])
+	fmt.Printf("Bootstrapping    : %d (%d --> %d)\n",mul_cnt[8]-mul_cnt[7], mul_cnt[7], mul_cnt[8])
 }
 
 func printDebug(params ckks.Parameters, ciphertext *rlwe.Ciphertext, valuesWant []complex128, decryptor rlwe.Decryptor, encoder ckks.Encoder) (valuesTest []complex128) {

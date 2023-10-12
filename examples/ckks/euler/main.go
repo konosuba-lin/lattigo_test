@@ -8,10 +8,12 @@ import (
 
 	"github.com/tuneinsight/lattigo/v4/ckks"
 	"github.com/tuneinsight/lattigo/v4/rlwe"
+	"github.com/tuneinsight/lattigo/v4/ring"
 )
 
 func example() {
-
+	var mul_cnt_s, mul_cnt_f int
+	mul_cnt_s = ring.MUL_COUNT
 	var start time.Time
 	var err error
 
@@ -196,7 +198,8 @@ func example() {
 	fmt.Printf("Done in %s \n", time.Since(start))
 
 	printDebug(params, ciphertext, values, decryptor, encoder)
-
+	mul_cnt_f = ring.MUL_COUNT
+	fmt.Printf("MUL COUNT: %d --> %d\n", mul_cnt_s, mul_cnt_f)
 }
 
 func printDebug(params ckks.Parameters, ciphertext *rlwe.Ciphertext, valuesWant []complex128, decryptor rlwe.Decryptor, encoder ckks.Encoder) (valuesTest []complex128) {

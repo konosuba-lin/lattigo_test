@@ -1,9 +1,16 @@
 package ring
-
 import (
 	"math/big"
 	"math/bits"
 )
+
+var (
+	MUL_COUNT int = 0
+)
+
+/*func Get_mul_count() int{
+	return MUL_COUNT
+}*/
 
 // MForm switches a to the Montgomery domain by computing
 // a*2^64 mod q.
@@ -13,6 +20,7 @@ func MForm(a, q uint64, u []uint64) (r uint64) {
 	if r >= q {
 		r -= q
 	}
+	MUL_COUNT += 1
 	return
 }
 
@@ -22,6 +30,7 @@ func MForm(a, q uint64, u []uint64) (r uint64) {
 func MFormLazy(a, q uint64, u []uint64) (r uint64) {
 	mhi, _ := bits.Mul64(a, u[1])
 	r = -(a*u[0] + mhi) * q
+	MUL_COUNT += 1
 	return
 }
 
@@ -33,6 +42,7 @@ func IMForm(a, q, qInv uint64) (r uint64) {
 	if r >= q {
 		r -= q
 	}
+	MUL_COUNT += 1
 	return
 }
 
@@ -42,6 +52,7 @@ func IMForm(a, q, qInv uint64) (r uint64) {
 func IMFormLazy(a, q, qInv uint64) (r uint64) {
 	r, _ = bits.Mul64(a*qInv, q)
 	r = q - r
+	MUL_COUNT += 1
 	return
 }
 
@@ -63,6 +74,7 @@ func MRed(x, y, q, qInv uint64) (r uint64) {
 	if r >= q {
 		r -= q
 	}
+	MUL_COUNT += 1
 	return
 }
 
@@ -72,6 +84,7 @@ func MRedLazy(x, y, q, qInv uint64) (r uint64) {
 	ahi, alo := bits.Mul64(x, y)
 	H, _ := bits.Mul64(alo*qInv, q)
 	r = ahi - H + q
+	MUL_COUNT += 1
 	return
 }
 
@@ -94,6 +107,7 @@ func BRedAdd(a, q uint64, u []uint64) (r uint64) {
 	if r >= q {
 		r -= q
 	}
+	MUL_COUNT += 1
 	return
 }
 
@@ -101,6 +115,7 @@ func BRedAdd(a, q uint64, u []uint64) (r uint64) {
 // The result is between 0 and 2*q-1.
 func BRedAddLazy(x, q uint64, u []uint64) uint64 {
 	s0, _ := bits.Mul64(x, u[0])
+	MUL_COUNT += 1
 	return x - s0*q
 }
 
@@ -138,7 +153,7 @@ func BRed(x, y, q uint64, u []uint64) (r uint64) {
 	if r >= q {
 		r -= q
 	}
-
+	MUL_COUNT += 1
 	return
 }
 
@@ -173,7 +188,7 @@ func BRedLazy(x, y, q uint64, u []uint64) (r uint64) {
 	r += carry
 
 	r = mlo - r*q
-
+	MUL_COUNT += 1
 	return
 }
 
