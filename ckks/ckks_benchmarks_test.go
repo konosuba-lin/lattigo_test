@@ -3,7 +3,7 @@ package ckks
 import (
 	"encoding/json"
 	"testing"
-
+	"fmt"
 	"github.com/tuneinsight/lattigo/v4/ring"
 	"github.com/tuneinsight/lattigo/v4/rlwe"
 	"github.com/tuneinsight/lattigo/v4/utils"
@@ -13,7 +13,8 @@ func BenchmarkCKKSScheme(b *testing.B) {
 
 	var err error
 
-	defaultParams := append(DefaultParams, DefaultConjugateInvariantParams...)
+	//defaultParams := append(DefaultParams, DefaultConjugateInvariantParams...)
+	defaultParams := DefaultParams
 	if testing.Short() {
 		defaultParams = DefaultParams[:2]
 	}
@@ -36,12 +37,12 @@ func BenchmarkCKKSScheme(b *testing.B) {
 			b.Fatal(err)
 		}
 
-		benchEncoder(tc, b)
-		benchKeyGen(tc, b)
-		benchEncrypt(tc, b)
-		benchDecrypt(tc, b)
+		//benchEncoder(tc, b)
+		//benchKeyGen(tc, b)
+		//benchEncrypt(tc, b)
+		//benchDecrypt(tc, b)
 		benchEvaluator(tc, b)
-		benchInnerSum(tc, b)
+		//benchInnerSum(tc, b)
 	}
 }
 
@@ -135,7 +136,7 @@ func benchDecrypt(tc *testContext, b *testing.B) {
 
 func benchEvaluator(tc *testContext, b *testing.B) {
 
-	plaintext := NewPlaintext(tc.params, tc.params.MaxLevel())
+	//plaintext := NewPlaintext(tc.params, tc.params.MaxLevel())
 	ciphertext1 := rlwe.NewCiphertextRandom(tc.prng, tc.params.Parameters, 1, tc.params.MaxLevel())
 	ciphertext2 := rlwe.NewCiphertextRandom(tc.prng, tc.params.Parameters, 1, tc.params.MaxLevel())
 	receiver := rlwe.NewCiphertextRandom(tc.prng, tc.params.Parameters, 2, tc.params.MaxLevel())
@@ -149,7 +150,7 @@ func benchEvaluator(tc *testContext, b *testing.B) {
 
 	eval := tc.evaluator.WithKey(rlwe.EvaluationKey{Rlk: rlk, Rtks: rotkey})
 
-	b.Run(GetTestName(tc.params, "Evaluator/Add"), func(b *testing.B) {
+	/*b.Run(GetTestName(tc.params, "Evaluator/Add"), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			eval.Add(ciphertext1, ciphertext2, ciphertext1)
 		}
@@ -224,6 +225,17 @@ func benchEvaluator(tc *testContext, b *testing.B) {
 	b.Run(GetTestName(tc.params, "Evaluator/Rotate"), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			eval.Rotate(ciphertext1, 1, ciphertext1)
+		}
+	})*/
+
+
+	var mul_cnt[2] int
+	b.Run(GetTestName(tc.params, "Evaluator/MulRelin"), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			mul_cnt[0] = ring.MUL_COUNT
+			eval.MulRelin(ciphertext1, ciphertext2, receiver)
+			mul_cnt[1] = ring.MUL_COUNT
+			fmt.Printf("Evaluator/MulRelin: %d (%d --> %d)\n",mul_cnt[1]-mul_cnt[0], mul_cnt[0], mul_cnt[1])
 		}
 	})
 }
