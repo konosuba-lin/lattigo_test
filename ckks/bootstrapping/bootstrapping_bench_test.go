@@ -15,7 +15,7 @@ func BenchmarkBootstrap(b *testing.B) {
 	var err error
 	var btp *Bootstrapper
 
-	paramSet := DefaultParametersDense[0]
+	paramSet := DefaultParametersSparse[0]
 
 	ckksParamsLit, btpParams, err := NewParametersFromLiteral(paramSet.SchemeParams, paramSet.BootstrappingParams)
 	require.Nil(b, err)
