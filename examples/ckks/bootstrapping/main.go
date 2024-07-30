@@ -8,25 +8,30 @@ import (
 	"flag"
 	"fmt"
 	"math"
-
+	//"math/cmplx"
 	"github.com/tuneinsight/lattigo/v4/ckks"
 	"github.com/tuneinsight/lattigo/v4/ckks/bootstrapping"
 	"github.com/tuneinsight/lattigo/v4/rlwe"
 	"github.com/tuneinsight/lattigo/v4/utils"
 	"github.com/tuneinsight/lattigo/v4/ring"
+	"github.com/pkg/profile"
+	//"os"
+	//"strconv"
 )
 
 var flagShort = flag.Bool("short", false, "run the example with a smaller and insecure ring degree.")
 
 func main() {
-	var mul_cnt[10] int
+	var mul_cnt[11] int
 	mul_cnt[0] = ring.MUL_COUNT
 	flag.Parse()
-
+	defer profile.Start(profile.MemProfile).Stop()
+	/*
 	// First we define the residual CKKS parameters. This is only a template that will be given
 	// to the constructor along with the specificities of the bootstrapping circuit we choose, to
 	// enable it to create the appropriate ckks.ParametersLiteral that enable the evaluation of the
 	// bootstrapping circuit on top of the residual moduli that we defined.
+	//custom 0
 	ckksParamsResidualLit := ckks.ParametersLiteral{
 		LogN:     16,                                                // Log2 of the ringdegree
 		LogSlots: 15,                                                // Log2 of the number of slots
@@ -54,11 +59,39 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Bootstrapping depth (bits): %d\n", bits)
+	*/
 
 	// Now we generate the updated ckks.ParametersLiteral that contain our residual moduli and the moduli for
 	// the bootstrapping circuit, as well as the bootstrapping.Parameters that contain all the necessary information
 	// of the bootstrapping circuit.
+	/*
+	param_type := os.Args[1]
+	param_idx, e:= strconv.Atoi(os.Args[2]) 
+    if e == nil { 
+        fmt.Printf("%T \n %v", param_idx, param_idx) 
+    } 
+	paramSet := bootstrapping.DefaultParametersSparse[0]
+	if (param_idx>=4) {
+		fmt.Printf("Error: param_idx>4, use default param sparse_0\n")
+	} else if ((param_type!="sparse") && (param_type!="dense")) {
+		fmt.Printf("Error: param_type!=Sparse/Dense, use default param sparse_0\n")
+	} else {
+		if param_type=="sparse" {
+			fmt.Printf("\n\nParameter =  sparse_%d\n",param_idx)
+			paramSet = bootstrapping.DefaultParametersSparse[param_idx]
+		} else {
+			fmt.Printf("\n\nParameter =  dense_%d\n",param_idx)
+			paramSet = bootstrapping.DefaultParametersDense[param_idx]
+		}
+	}
+	ckksParamsResidualLit := paramSet.SchemeParams
+	btpParametersLit := paramSet.BootstrappingParams
+	*/
+	paramSet := bootstrapping.DefaultParametersSparse[2]
+	ckksParamsResidualLit := paramSet.SchemeParams
+	btpParametersLit := paramSet.BootstrappingParams
 	ckksParamsLit, btpParams, err := bootstrapping.NewParametersFromLiteral(ckksParamsResidualLit, btpParametersLit)
+	fmt.Printf("paramSet : %p\n", ckksParamsLit)
 	if err != nil {
 		panic(err)
 	}
@@ -101,6 +134,16 @@ func main() {
 	evk := bootstrapping.GenEvaluationKeys(btpParams, params, sk)
 	fmt.Println("Done")
 	mul_cnt[2] = ring.MUL_COUNT
+	fmt.Println("Calculating bootstrapping key size...")
+	Rlk_size := evk.EvaluationKey.Rlk.MarshalBinarySize()
+	Rtks_size := evk.EvaluationKey.Rtks.MarshalBinarySize()
+	SwkDtS_size := evk.SwkDtS.MarshalBinarySize()
+	SwkStD_size := evk.SwkStD.MarshalBinarySize()
+	fmt.Printf("Rlk%d\n", Rlk_size)
+	fmt.Printf("Rtks:%d\n", Rtks_size)
+	fmt.Printf("SwkDtS:%d\n", SwkDtS_size)
+	fmt.Printf("SwkStD:%d\n", SwkStD_size)
+	fmt.Printf("Total:%d\n", Rlk_size+Rtks_size+SwkDtS_size+SwkStD_size)
 
 	var btp *bootstrapping.Bootstrapper
 	if btp, err = bootstrapping.NewBootstrapper(params, btpParams, evk); err != nil {
@@ -122,7 +165,7 @@ func main() {
 	mul_cnt[6] = ring.MUL_COUNT
 	// Decrypt, print and compare with the plaintext values
 	fmt.Println()
-	fmt.Println("Precision of values vs. ciphertext")
+	fmt.Println("Precision loss during encryption")
 	valuesTest1 := printDebug(params, ciphertext1, valuesWant, decryptor, encoder)
 
 	// Bootstrap the ciphertext (homomorphic re-encryption)
@@ -140,13 +183,48 @@ func main() {
 
 	// Decrypt, print and compare with the plaintext values
 	fmt.Println()
-	fmt.Println("Precision of ciphertext vs. Bootstrap(ciphertext)")
+	fmt.Println("Precision loss during bootstrapping")
 	printDebug(params, ciphertext2, valuesTest1, decryptor, encoder)
+
+	//valuesTest2 := printDebug(params, ciphertext2, valuesTest1, decryptor, encoder)
+
+	//evaluate x^(pow(2,L-Lboot))
+	/*r := math.Pow(2,float64(ciphertext2.Level()))
+	fmt.Printf("Evaluate x^pow(2,%d) = x^%d\n",ciphertext2.Level(),int(r))
+	slots := params.Slots()
+	valuesWant2 := make([]complex128, slots)
+	valuesWant3 := make([]complex128, slots)
+	for i := range valuesWant2 {
+		valuesWant2[i] = cmplx.Pow(valuesTest2[i], complex(r, 0))
+		valuesWant3[i] = cmplx.Pow(valuesWant[i], complex(r, 0))
+	}
+	rlk := kgen.GenRelinearizationKey(sk, 1)
+	evaluator := ckks.NewEvaluator(params, rlwe.EvaluationKey{Rlk: rlk})
+	monomialBasis := ckks.NewPolynomialBasis(ciphertext2, ckks.Monomial)
+	mul_cnt[9] = ring.MUL_COUNT
+	monomialBasis.GenPower(int(r), false, params.DefaultScale(), evaluator)
+	mul_cnt[10] = ring.MUL_COUNT
+	ciphertext3 := monomialBasis.Value[int(r)]
+	fmt.Printf("Done\n")
+	fmt.Println()
+	fmt.Println("Precision loss during bootstrapped ciphertext^r\n")
+	printDebug(params, ciphertext3, valuesWant2, decryptor, encoder)
+	//precision loss blows up becasue x is in [-1,1] and usually |x|<1 and |x^r| are too small 
+	//you can use x = [cos theta, sin theta] instead to keep |x^r|=1  
+
+	//decrypt
+	fmt.Println("Total Precision loss\n")
+	encoder.Decode(decryptor.DecryptNew(ciphertext3), params.LogSlots())
+	printDebug(params, ciphertext3, valuesWant3, decryptor, encoder)*/
+
+
+
 	fmt.Printf("----------------MUL COUNT----------------\n")
 	fmt.Printf("GenEvaluationKeys: %d (%d --> %d)\n",mul_cnt[2]-mul_cnt[1], mul_cnt[1], mul_cnt[2])
 	fmt.Printf("EncodeNew        : %d (%d --> %d)\n",mul_cnt[4]-mul_cnt[3], mul_cnt[3], mul_cnt[4])
 	fmt.Printf("EncryptNew       : %d (%d --> %d)\n",mul_cnt[6]-mul_cnt[5], mul_cnt[5], mul_cnt[6])
 	fmt.Printf("Bootstrapping    : %d (%d --> %d)\n",mul_cnt[8]-mul_cnt[7], mul_cnt[7], mul_cnt[8])
+	fmt.Printf("Power            : %d (%d --> %d)\n",mul_cnt[10]-mul_cnt[9], mul_cnt[9], mul_cnt[10])
 }
 
 func printDebug(params ckks.Parameters, ciphertext *rlwe.Ciphertext, valuesWant []complex128, decryptor rlwe.Decryptor, encoder ckks.Encoder) (valuesTest []complex128) {

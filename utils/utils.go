@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"math/big"
 	"math/bits"
+	"math"
 )
 
 // RandUint64 return a random value between 0 and 0xFFFFFFFFFFFFFFFF.
@@ -29,6 +30,13 @@ func RandFloat64(min, max float64) float64 {
 // RandComplex128 returns a random complex with the real and imaginary part between min and max.
 func RandComplex128(min, max float64) complex128 {
 	return complex(RandFloat64(min, max), RandFloat64(min, max))
+}
+
+//randcomplex128 but x^2+y^2=1
+func RandComplex128_circ() complex128 {
+	theta := RandFloat64(-math.Pi, math.Pi)
+	x, y :=  math.Cos(theta), math.Sin(theta)
+	return complex(x,y)
 }
 
 // RandInt generates a random Int in [0, max-1].

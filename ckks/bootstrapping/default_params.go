@@ -21,6 +21,7 @@ var DefaultParametersSparse = []defaultParametersLiteral{N16QP1546H192H32, N16QP
 // DefaultParametersDense is a set of default bootstrapping parameters with H=N/2 as main secret and H=32 as ephemeral secret.
 var DefaultParametersDense = []defaultParametersLiteral{N16QP1767H32768H32, N16QP1788H32768H32, N16QP1793H32768H32, N15QP880H16384H32}
 
+var Custom = []defaultParametersLiteral{custom1, custom2, custom3, custom4}
 var (
 	// N16QP1546H192H32 is a default bootstrapping parameters for a main secret with H=192 and an ephemeral secret with H=32.
 	// Residual Q : []int{60, 40, 40, 40, 40, 40, 40, 40, 40, 40} (420 bits).
@@ -190,5 +191,61 @@ var (
 			CoeffsToSlotsFactorizationDepthAndLogScales: [][]int{{52}, {52}},
 			EvalModLogScale: utils.PointyInt(55),
 		},
+	}
+
+	custom1 = defaultParametersLiteral{
+		ckks.ParametersLiteral{
+			LogN:     15,
+			LogQ:     []int{40, 31, 31, 31},
+			LogP:     []int{56, 56},
+			H:        16384,
+			LogScale: 31,
+		},
+		ParametersLiteral{
+			SlotsToCoeffsFactorizationDepthAndLogScales: [][]int{{30}, {30, 30}},
+			CoeffsToSlotsFactorizationDepthAndLogScales: [][]int{{52}, {52}},
+			EvalModLogScale: utils.PointyInt(55),
+		},
+	}
+
+	custom2 = defaultParametersLiteral{
+		ckks.ParametersLiteral{
+			LogN:     15,
+			LogQ:     []int{40, 31, 31},
+			LogP:     []int{56, 56},
+			H:        16384,
+			LogScale: 31,
+		},
+		ParametersLiteral{
+			SlotsToCoeffsFactorizationDepthAndLogScales: [][]int{{30, 30}, {30, 30}},
+			CoeffsToSlotsFactorizationDepthAndLogScales: [][]int{{52}, {52}},
+			EvalModLogScale: utils.PointyInt(55),
+		},
+	}
+
+	custom3 = defaultParametersLiteral{
+		ckks.ParametersLiteral{
+			LogN:     15,
+			LogQ:     []int{40, 31},
+			LogP:     []int{56, 56},
+			H:        16384,
+			LogScale: 31,
+		},
+		ParametersLiteral{
+			SlotsToCoeffsFactorizationDepthAndLogScales: [][]int{{30}, {30, 30}},
+			CoeffsToSlotsFactorizationDepthAndLogScales: [][]int{{52}, {52}, {52}},
+			EvalModLogScale: utils.PointyInt(55),
+		},
+	}
+
+	custom4 = defaultParametersLiteral{
+		ckks.ParametersLiteral{
+			LogN:     16,
+			LogQ:     []int{60, 40, 40, 40, 40, 40, 40},
+			LogP:     []int{61, 61, 61, 61, 61, 61, 61, 61},
+			H:        192,
+			LogScale: 40,
+		},
+		ParametersLiteral{},
 	}
 )

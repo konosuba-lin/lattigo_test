@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/kr/pretty v0.3.0 // indirect
+	github.com/pkg/profile v1.7.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
