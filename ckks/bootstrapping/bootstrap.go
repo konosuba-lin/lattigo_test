@@ -3,6 +3,7 @@ package bootstrapping
 import (
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ring"
+	"log"
 	"math"
 )
 
