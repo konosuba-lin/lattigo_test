@@ -36,6 +36,7 @@ func PowerOf2(x uint64, n int, q, qInv uint64) (r uint64) {
 	if r >= q {
 		r -= q
 	}
+	MUL_COUNT += 1
 	return
 }
 

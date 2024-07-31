@@ -440,6 +440,7 @@ func (decomposer *Decomposer) DecomposeAndSplit(levelQ, levelP, nbPi, decompRNS 
 				vi[5] += float64(y5[i]) / qif
 				vi[6] += float64(y6[i]) / qif
 				vi[7] += float64(y7[i]) / qif
+				MUL_COUNT += 8
 			}
 
 			// Index of the correction term
@@ -507,6 +508,7 @@ func reconstructRNS(index, x int, p [][]uint64, v *[8]uint64, y0, y1, y2, y3, y4
 		vi[5] += float64(y5[i]) / qif
 		vi[6] += float64(y6[i]) / qif
 		vi[7] += float64(y7[i]) / qif
+		MUL_COUNT += 8
 	}
 
 	v[0] = uint64(vi[0])
@@ -559,6 +561,7 @@ func multSum(res, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6, y7 *[32]uint64, nbPi
 		mhi, mlo = bits.Mul64(y7[i], qoverqimodp[i])
 		rlo[7], c = bits.Add64(rlo[7], mlo, 0)
 		rhi[7] += mhi + c
+		MUL_COUNT += 8
 	}
 
 	hhi, _ = bits.Mul64(rlo[0]*qInv, pj)
@@ -584,4 +587,5 @@ func multSum(res, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6, y7 *[32]uint64, nbPi
 
 	hhi, _ = bits.Mul64(rlo[7]*qInv, pj)
 	res[7] = rhi[7] - hhi + pj + vtimesqmodp[v[7]]
+	MUL_COUNT += 8
 }
