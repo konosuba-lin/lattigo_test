@@ -3,7 +3,7 @@ package ckks
 import (
 	"github.com/ldsec/lattigo/v2/ring"
 	"github.com/ldsec/lattigo/v2/utils"
-	//"log"
+	"log"
 	"math"
 	//"time"
 )
@@ -15,6 +15,7 @@ import (
 func (btp *Bootstrapper) Bootstrapp(ct *Ciphertext) *Ciphertext {
 	//var t time.Time
 	var ct0, ct1 *Ciphertext
+	var mul_cnt int
 
 	// Drops the level to 1
 	for ct.Level() != 1 {
@@ -45,33 +46,36 @@ func (btp *Bootstrapper) Bootstrapp(ct *Ciphertext) *Ciphertext {
 
 	// ModUp ct_{Q_0} -> ct_{Q_L}
 	//t = time.Now()
+	mul_cnt = ring.MUL_COUNT
 	ct = btp.modUp(ct)
-	//log.Println("After ModUp  :", time.Now().Sub(t), ct.Level(), ct.Scale())
-
+	log.Println("After ModUp  :", ring.MUL_COUNT-mul_cnt, ct.Level(), ct.Scale())
+	mul_cnt = ring.MUL_COUNT
+	
 	// Brings the ciphertext scale to sineQi/(Q0/scale) if its under
 	btp.evaluator.ScaleUp(ct, math.Round(btp.postscale/ct.Scale()), ct)
 
 	//SubSum X -> (N/dslots) * Y^dslots
 	//t = time.Now()
 	ct = btp.subSum(ct)
-	//log.Println("After SubSum :", time.Now().Sub(t), ct.Level(), ct.Scale())
+	log.Println("After SubSum :", ring.MUL_COUNT-mul_cnt, ct.Level(), ct.Scale())
+	mul_cnt = ring.MUL_COUNT
 	// Part 1 : Coeffs to slots
 
 	//t = time.Now()
 	ct0, ct1 = btp.coeffsToSlots(ct)
-	//log.Println("After CtS    :", time.Now().Sub(t), ct0.Level(), ct0.Scale())
-
+	log.Println("After CtS    :", ring.MUL_COUNT-mul_cnt, ct0.Level(), ct0.Scale())
+	mul_cnt = ring.MUL_COUNT
 	// Part 2 : SineEval
 	//t = time.Now()
 	ct0, ct1 = btp.evaluateSine(ct0, ct1)
-	//log.Println("After Sine   :", time.Now().Sub(t), ct0.Level(), ct0.Scale())
+	log.Println("After Sine   :", ring.MUL_COUNT-mul_cnt, ct0.Level(), ct0.Scale())
+	mul_cnt = ring.MUL_COUNT
 
 	// Part 3 : Slots to coeffs
 	//t = time.Now()
 	ct0 = btp.slotsToCoeffs(ct0, ct1)
-
 	ct0.SetScale(math.Exp2(math.Round(math.Log2(ct0.Scale())))) // rounds to the nearest power of two
-	//log.Println("After StC    :", time.Now().Sub(t), ct0.Level(), ct0.Scale())
+	log.Println("After StC    :", ring.MUL_COUNT-mul_cnt, ct0.Level(), ct0.Scale())
 	return ct0
 }
 

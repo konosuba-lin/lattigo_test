@@ -176,6 +176,7 @@ func NewSimpleScaler(t uint64, ringQ *Ring) (ss *SimpleScaler) {
 			if r >= ss.t {
 				r -= ss.t
 			}
+			MUL_COUNT += 1
 
 			return r
 		}

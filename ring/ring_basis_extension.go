@@ -728,6 +728,7 @@ func multSum(res, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6, y7 *[32]uint64, inde
 		mhi, mlo = bits.Mul64(y7[i], qispjMont[i])
 		rlo[7], c = bits.Add64(rlo[7], mlo, 0)
 		rhi[7] += mhi + c
+		MUL_COUNT += 8
 	}
 
 	hhi, _ = bits.Mul64(rlo[0]*qInv, pj)
@@ -753,4 +754,5 @@ func multSum(res, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6, y7 *[32]uint64, inde
 
 	hhi, _ = bits.Mul64(rlo[7]*qInv, pj)
 	res[7] = rhi[7] - hhi + pj + qpjInv[v[7]]
+	MUL_COUNT += 8
 }
