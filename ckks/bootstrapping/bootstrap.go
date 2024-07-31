@@ -2,7 +2,7 @@ package bootstrapping
 
 import (
 	"math"
-
+	"log"
 	"github.com/tuneinsight/lattigo/v3/ckks"
 	"github.com/tuneinsight/lattigo/v3/ring"
 )
@@ -14,7 +14,7 @@ import (
 func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Ciphertext) {
 
 	ctOut = ctIn.CopyNew()
-
+	var mul_cnt int
 	// Drops the level to 1
 	for ctOut.Level() > 1 {
 		btp.DropLevel(ctOut, 1)
@@ -47,6 +47,7 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 	}
 
 	// Step 1 : Extend the basis from q to Q
+	mul_cnt = ring.MUL_COUNT
 	ctOut = btp.modUpFromQ0(ctOut)
 
 	// Scale the message from Q0/|m| to QL/|m|, where QL is the largest modulus used during the bootstrapping.
@@ -56,10 +57,13 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 
 	//SubSum X -> (N/dslots) * Y^dslots
 	btp.Trace(ctOut, btp.params.LogSlots(), btp.params.LogN()-1, ctOut)
+	log.Println("After ModUp  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
 
 	// Step 2 : CoeffsToSlots (Homomorphic encoding)
 	ctReal, ctImag := btp.CoeffsToSlotsNew(ctOut, btp.ctsMatrices)
-
+	log.Println("After CtS  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
 	// Step 3 : EvalMod (Homomorphic modular reduction)
 	// ctReal = Ecd(real)
 	// ctImag = Ecd(imag)
@@ -71,9 +75,12 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 		ctImag = btp.EvalModNew(ctImag, btp.evalModPoly)
 		ctImag.Scale = btp.params.DefaultScale()
 	}
+	log.Println("After EvalMod  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
 
 	// Step 4 : SlotsToCoeffs (Homomorphic decoding)
 	ctOut = btp.SlotsToCoeffsNew(ctReal, ctImag, btp.stcMatrices)
+	log.Println("After StC  :", ring.MUL_COUNT-mul_cnt)
 
 	return
 }
