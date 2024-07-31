@@ -36,7 +36,7 @@ func main() {
 	// When changing LogSlots make sure that the number of levels allocated to CtS and StC is
 	// smaller or equal to LogSlots.
 
-	paramSet := bootstrapping.DefaultParametersSparse[0] // bootstrapping.DefaultParametersDense[0]
+	paramSet := bootstrapping.DefaultParametersSparse[1] // bootstrapping.DefaultParametersDense[0]
 	ckksParams := paramSet.SchemeParams
 
 	if *flagShort {
