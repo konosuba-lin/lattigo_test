@@ -53,10 +53,13 @@ func main() {
 	rotations := btpParams.RotationsForBootstrapping(params.LogN(), params.LogSlots())
 	rotkeys := kgen.GenRotationKeysForRotations(rotations, true, sk)
 	rlk := kgen.GenRelinearizationKey(sk, 2)
+	rotkeysbyte, err := rotkeys.MarshalBinary()
+	rlkbyte, err := rlk.MarshalBinary()
 	if btp, err = bootstrapping.NewBootstrapper(params, btpParams, rlwe.EvaluationKey{Rlk: rlk, Rtks: rotkeys}); err != nil {
 		panic(err)
 	}
 	fmt.Println("Done")
+	fmt.Println("total btp keys = %f (GB)",float64(len(rotkeysbyte)+len(rlkbyte))/float64(1000000000))
 
 	// Generate a random plaintext
 	valuesWant := make([]complex128, params.Slots())
