@@ -13,7 +13,6 @@ import (
 func main() {
 
 	var err error
-	var mul_cnt int
 	var btp *bootstrapping.Bootstrapper
 	var kgen rlwe.KeyGenerator
 	var encoder ckks.Encoder
@@ -57,6 +56,11 @@ func main() {
 	fmt.Println("Generating bootstrapping keys...")
 	evk := bootstrapping.GenEvaluationKeys(btpParams, params, sk)
 	fmt.Println("Done")
+	Rlkbyte, err := evk.EvaluationKey.Rlk.MarshalBinary()
+	Rtksbyte, err := evk.EvaluationKey.Rtks.MarshalBinary()
+	SwkDtSbyte, err := evk.SwkDtS.MarshalBinary()
+	SwkStDbyte, err := evk.SwkStD.MarshalBinary()
+	fmt.Printf("Total Btp Key Size (GB): %f\n",float64(len(Rlkbyte)+len(Rtksbyte)+len(SwkDtSbyte)+len(SwkStDbyte))/float64(1000000000))
 
 	if btp, err = bootstrapping.NewBootstrapper(params, btpParams, evk); err != nil {
 		panic(err)

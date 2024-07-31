@@ -4,7 +4,9 @@ import (
 	"math/big"
 	"math/bits"
 )
-
+var (
+	MUL_COUNT int = 0
+)
 // MForm switches a to the Montgomery domain by computing
 // a*2^64 mod q.
 func MForm(a, q uint64, u []uint64) (r uint64) {
