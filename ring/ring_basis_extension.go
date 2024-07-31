@@ -591,6 +591,7 @@ func (decomposer *Decomposer) DecomposeAndSplit(level, crtDecompLevel uint64, p0
 				vi[5] += float64(y5[i]) / qif
 				vi[6] += float64(y6[i]) / qif
 				vi[7] += float64(y7[i]) / qif
+				MUL_COUNT += 8
 			}
 
 			// Index of the correction term
@@ -676,6 +677,7 @@ func reconstructRNS(index, x uint64, p [][]uint64, v *[8]uint64, y0, y1, y2, y3,
 		vi[5] += float64(y5[i]) / qif
 		vi[6] += float64(y6[i]) / qif
 		vi[7] += float64(y7[i]) / qif
+		MUL_COUNT += 8
 	}
 
 	v[0] = uint64(vi[0])
