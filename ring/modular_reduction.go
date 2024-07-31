@@ -27,6 +27,7 @@ func MForm(a, q uint64, u []uint64) (r uint64) {
 func MFormConstant(a, q uint64, u []uint64) (r uint64) {
 	mhi, _ := bits.Mul64(a, u[1])
 	r = -(a*u[0] + mhi) * q
+	MUL_COUNT += 1
 	return
 }
 
