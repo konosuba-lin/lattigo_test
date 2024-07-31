@@ -442,6 +442,7 @@ func modUpExact(p1, p2 [][]uint64, params *modupParams) {
 			vi5 += float64(y5[i]) / qif
 			vi6 += float64(y6[i]) / qif
 			vi7 += float64(y7[i]) / qif
+			MUL_COUNT += 8
 		}
 
 		// Index of the correction term
@@ -674,6 +675,7 @@ func (decomposer *Decomposer) Decompose(level, crtDecompLevel uint64, p0, p1 *Po
 				vi[5] += float64(y5[i]) / qif
 				vi[6] += float64(y6[i]) / qif
 				vi[7] += float64(y7[i]) / qif
+				MUL_COUNT += 8
 			}
 
 			// Index of the correction term
@@ -939,6 +941,7 @@ func (decomposer *Decomposer) DecomposeAndSplit(level, crtDecompLevel uint64, p0
 				vi[5] += float64(y5[i]) / qif
 				vi[6] += float64(y6[i]) / qif
 				vi[7] += float64(y7[i]) / qif
+				MUL_COUNT += 8
 			}
 
 			// Index of the correction term
