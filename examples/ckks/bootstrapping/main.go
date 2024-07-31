@@ -57,7 +57,11 @@ func main() {
 	fmt.Println("Generating bootstrapping keys...")
 	evk := bootstrapping.GenEvaluationKeys(btpParams, params, sk)
 	fmt.Println("Done")
-	fmt.Printf("Total Btp Key Size (GB): %d\n", (evk.EvaluationKey.Rlk.MarshalBinarySize() + evk.EvaluationKey.Rtks.MarshalBinarySize() + evk.SwkDtS.MarshalBinarySize() + evk.SwkStD.MarshalBinarySize())/1000000000)
+	Rlkbyte, err := evk.EvaluationKey.Rlk.MarshalBinary()
+	Rtksbyte, err := evk.EvaluationKey.Rtks.MarshalBinary()
+	SwkDtSbyte, err := evk.SwkDtS.MarshalBinary()
+	SwkStDbyte, err := evk.SwkStD.MarshalBinary()
+	fmt.Printf("Total Btp Key Size (GB): %f\n",float64(len(Rlkbyte)+len(Rtksbyte)+len(SwkDtSbyte)+len(SwkStDbyte))/float64(1000000000))
 
 	if btp, err = bootstrapping.NewBootstrapper(params, btpParams, evk); err != nil {
 		panic(err)
