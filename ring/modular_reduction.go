@@ -7,6 +7,7 @@ import (
 
 // MForm switches a to the Montgomery domain by computing
 // a*2^64 mod q.
+var MUL_COUNT = 0
 func MForm(a, q uint64, u []uint64) (r uint64) {
 	mhi, _ := bits.Mul64(a, u[1])
 	r = -(a*u[0] + mhi) * q

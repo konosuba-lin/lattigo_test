@@ -11,11 +11,10 @@ import (
 // If the input ciphertext is at level one or more, the input scale does not need to be an exact power of two as one level
 // can be used to do a scale matching.
 func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Ciphertext) {
-
+	var mul_cnt int
 	ctOut = ctIn.CopyNew()
-
 	bootstrappingScale := math.Exp2(math.Round(math.Log2(btp.params.QiFloat64(0) / btp.evalModPoly.MessageRatio())))
-
+	
 	// Drops the level to 1
 	for ctOut.Level() > 1 {
 		btp.DropLevel(ctOut, 1)
@@ -23,7 +22,7 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 
 	// Brings the ciphertext scale to Q0/MessageRatio
 	if ctOut.Level() == 1 {
-
+		
 		// If one level is available, then uses it to match the scale
 		btp.SetScale(ctOut, bootstrappingScale)
 
@@ -32,30 +31,35 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 			btp.DropLevel(ctOut, 1)
 		}
 
-	} else {
+		} else {
 
-		// Does an integer constant mult by round((Q0/Delta_m)/ctscle)
+			// Does an integer constant mult by round((Q0/Delta_m)/ctscle)
 		if bootstrappingScale < ctOut.Scale {
 			panic("ciphetext scale > q/||m||)")
 		}
-
+		
 		btp.ScaleUp(ctOut, math.Round(bootstrappingScale/ctOut.Scale), ctOut)
 	}
 
 	// Step 1 : Extend the basis from q to Q
+	mul_cnt = ring.MUL_COUNT
 	ctOut = btp.modUpFromQ0(ctOut)
-
+	
 	// Brings the ciphertext scale to sineQi/(Q0/scale) if Q0 < sineQi
 	// Does it after modUp to avoid plaintext overflow
 	// Reduces the additive error of the next steps
 	btp.ScaleUp(ctOut, math.Round((btp.evalModPoly.ScalingFactor()/btp.evalModPoly.MessageRatio())/ctOut.Scale), ctOut)
-
+	
 	//SubSum X -> (N/dslots) * Y^dslots
 	btp.Trace(ctOut, btp.params.LogSlots(), btp.params.LogN()-1, ctOut)
-
+	log.Println("After ModUp  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
+	
 	// Step 2 : CoeffsToSlots (Homomorphic encoding)
 	ctReal, ctImag := btp.CoeffsToSlotsNew(ctOut, btp.ctsMatrices)
-
+	log.Println("After CtS  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
+	
 	// Step 3 : EvalMod (Homomorphic modular reduction)
 	// ctReal = Ecd(real)
 	// ctImag = Ecd(imag)
@@ -67,9 +71,12 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 		ctImag = btp.EvalModNew(ctImag, btp.evalModPoly)
 		ctImag.Scale = btp.params.Scale()
 	}
-
+	log.Println("After EvalMod  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
+	
 	// Step 4 : SlotsToCoeffs (Homomorphic decoding)
 	ctOut = btp.SlotsToCoeffsNew(ctReal, ctImag, btp.stcMatrices)
+	log.Println("After StC  :", ring.MUL_COUNT-mul_cnt)
 
 	return
 }
