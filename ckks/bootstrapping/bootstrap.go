@@ -57,10 +57,13 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 
 	//SubSum X -> (N/dslots) * Y^dslots
 	btp.Trace(ctOut, btp.params.LogSlots(), btp.params.LogN()-1, ctOut)
+	log.Println("After ModUp  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
 
 	// Step 2 : CoeffsToSlots (Homomorphic encoding)
 	ctReal, ctImag := btp.CoeffsToSlotsNew(ctOut, btp.ctsMatrices)
-
+	log.Println("After CtS  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
 	// Step 3 : EvalMod (Homomorphic modular reduction)
 	// ctReal = Ecd(real)
 	// ctImag = Ecd(imag)
@@ -72,10 +75,11 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 		ctImag = btp.EvalModNew(ctImag, btp.evalModPoly)
 		ctImag.Scale = btp.params.DefaultScale()
 	}
-
+	log.Println("After EvalMod  :", ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
 	// Step 4 : SlotsToCoeffs (Homomorphic decoding)
 	ctOut = btp.SlotsToCoeffsNew(ctReal, ctImag, btp.stcMatrices)
-
+	log.Println("After StC  :", ring.MUL_COUNT-mul_cnt)
 	return
 }
 
