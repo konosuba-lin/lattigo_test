@@ -13,7 +13,7 @@ import (
 func main() {
 
 	var err error
-
+	var mul_cnt int
 	var btp *bootstrapping.Bootstrapper
 	var kgen rlwe.KeyGenerator
 	var encoder ckks.Encoder
