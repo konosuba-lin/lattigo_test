@@ -5,8 +5,8 @@ import (
 	"math/bits"
 )
 
-(
-	var MUL_COUNT int = 0
+var (
+	MUL_COUNT int = 0
 )
 
 // MForm switches a to the Montgomery domain by computing
