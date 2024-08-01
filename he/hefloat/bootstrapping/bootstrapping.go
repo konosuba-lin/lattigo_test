@@ -244,7 +244,7 @@ func (eval Evaluator) bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext, 
 	if ctOut, err = eval.ModUp(ctOut); err != nil {
 		return
 	}
-	fmt.Printf("After ModUp",ring.MUL_COUNT-mul_cnt)
+	fmt.Printf("After ModUp %d\n",ring.MUL_COUNT-mul_cnt)
 	mul_cnt = ring.MUL_COUNT
 	
 	// Step 3 : CoeffsToSlots (Homomorphic encoding)
@@ -255,7 +255,7 @@ func (eval Evaluator) bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext, 
 	if ctReal, ctImag, err = eval.CoeffsToSlots(ctOut); err != nil {
 		return
 	}
-	fmt.Printf("After CtS",ring.MUL_COUNT-mul_cnt)
+	fmt.Printf("After CtS %d\n",ring.MUL_COUNT-mul_cnt)
 	mul_cnt = ring.MUL_COUNT
 	
 	// Step 4 : EvalMod (Homomorphic modular reduction)
@@ -269,14 +269,14 @@ func (eval Evaluator) bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext, 
 			return
 		}
 	}
-	fmt.Printf("After EvalMod",ring.MUL_COUNT-mul_cnt)
+	fmt.Printf("After EvalMod %d\n",ring.MUL_COUNT-mul_cnt)
 	mul_cnt = ring.MUL_COUNT
 	
 	// Step 5 : SlotsToCoeffs (Homomorphic decoding)
 	if ctOut, err = eval.SlotsToCoeffs(ctReal, ctImag); err != nil {
 		return
 	}
-	fmt.Printf("After StC",ring.MUL_COUNT-mul_cnt)
+	fmt.Printf("After StC %d\n",ring.MUL_COUNT-mul_cnt)
 
 	return
 }

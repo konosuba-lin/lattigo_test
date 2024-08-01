@@ -159,6 +159,8 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Done")
+	fmt.Printf("Total Btp Key Size (GB): %f\n", float64(evk.BinarySize())/float64(1000000000))
+
 
 	//========================
 	//=== 5) BOOTSTRAPPING ===
