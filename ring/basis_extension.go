@@ -533,6 +533,7 @@ func reconstructRNSCentered(start, end, x int, p [][]uint64, v *[8]uint64, vi *[
 		vi[5] += float64(y5[i]) / qif
 		vi[6] += float64(y6[i]) / qif
 		vi[7] += float64(y7[i]) / qif
+		MUL_COUNT += 8
 	}
 
 	// Index of the correction term
@@ -580,6 +581,7 @@ func reconstructRNS(start, end, x int, p [][]uint64, v *[8]uint64, y0, y1, y2, y
 		vi[5] += float64(y5[j]) / qif
 		vi[6] += float64(y6[j]) / qif
 		vi[7] += float64(y7[j]) / qif
+		MUL_COUNT += 8
 	}
 
 	v[0] = uint64(vi[0])
@@ -607,6 +609,7 @@ func multSum(level int, res, rlo, rhi, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6,
 	rhi[5], rlo[5] = bits.Mul64(y5[0], qqip)
 	rhi[6], rlo[6] = bits.Mul64(y6[0], qqip)
 	rhi[7], rlo[7] = bits.Mul64(y7[0], qqip)
+	MUL_COUNT += 8
 
 	// Accumulates the sum on uint128 and does a lazy montgomery reduction at the end
 	for i := 1; i < level+1; i++ {
@@ -644,6 +647,7 @@ func multSum(level int, res, rlo, rhi, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6,
 		mhi, mlo = bits.Mul64(y7[i], qqip)
 		rlo[7], c = bits.Add64(rlo[7], mlo, 0)
 		rhi[7] += mhi + c
+		MUL_COUNT += 8
 	}
 
 	hhi, _ = bits.Mul64(rlo[0]*qInv, q)
@@ -669,4 +673,5 @@ func multSum(level int, res, rlo, rhi, v *[8]uint64, y0, y1, y2, y3, y4, y5, y6,
 
 	hhi, _ = bits.Mul64(rlo[7]*qInv, q)
 	res[7] = rhi[7] - hhi + q + vtimesqmodp[v[7]]
+	MUL_COUNT += 8
 }

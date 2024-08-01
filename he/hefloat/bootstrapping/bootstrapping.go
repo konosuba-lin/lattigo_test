@@ -233,17 +233,20 @@ func checkMessageRatio(ct *rlwe.Ciphertext, msgRatio float64, r *ring.Ring) bool
 }
 
 func (eval Evaluator) bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext, errScale *rlwe.Scale, err error) {
-
+	var mul_cnt int
+	mul_cnt = ring.MUL_COUNT
 	// Step 1: scale to q/|m|
 	if ctOut, errScale, err = eval.ScaleDown(ctIn); err != nil {
 		return
 	}
-
+	
 	// Step 2 : Extend the basis from q to Q
 	if ctOut, err = eval.ModUp(ctOut); err != nil {
 		return
 	}
-
+	fmt.Printf("After ModUp",ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
+	
 	// Step 3 : CoeffsToSlots (Homomorphic encoding)
 	// ctReal = Ecd(real)
 	// ctImag = Ecd(imag)
@@ -252,23 +255,28 @@ func (eval Evaluator) bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext, 
 	if ctReal, ctImag, err = eval.CoeffsToSlots(ctOut); err != nil {
 		return
 	}
-
+	fmt.Printf("After CtS",ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
+	
 	// Step 4 : EvalMod (Homomorphic modular reduction)
 	if ctReal, err = eval.EvalMod(ctReal); err != nil {
 		return
 	}
-
+	
 	// Step 4 : EvalMod (Homomorphic modular reduction)
 	if ctImag != nil {
 		if ctImag, err = eval.EvalMod(ctImag); err != nil {
 			return
 		}
 	}
-
+	fmt.Printf("After EvalMod",ring.MUL_COUNT-mul_cnt)
+	mul_cnt = ring.MUL_COUNT
+	
 	// Step 5 : SlotsToCoeffs (Homomorphic decoding)
 	if ctOut, err = eval.SlotsToCoeffs(ctReal, ctImag); err != nil {
 		return
 	}
+	fmt.Printf("After StC",ring.MUL_COUNT-mul_cnt)
 
 	return
 }
