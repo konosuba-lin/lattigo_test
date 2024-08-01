@@ -29,8 +29,8 @@ func main() {
 	// LogSlots is hardcoded to 15 in the parameters, but can be changed from 1 to 15.
 	// When changing logSlots make sure that the number of levels allocated to CtS and StC is
 	// smaller or equal to logSlots.
-	ckksParams := bootstrapping.DefaultCKKSParameters[1]
-	btpParams := bootstrapping.DefaultParameters[1]
+	ckksParams := bootstrapping.DefaultCKKSParameters[0]
+	btpParams := bootstrapping.DefaultParameters[0]
 	params, err := ckks.NewParametersFromLiteral(ckksParams)
 	if err != nil {
 		panic(err)
