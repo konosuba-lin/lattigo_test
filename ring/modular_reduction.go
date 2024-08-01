@@ -192,9 +192,9 @@ func BRedConstant(x, y, q uint64, u []uint64) (r uint64) {
 
 // CRed reduce returns a mod q where a is between 0 and 2*q-1.
 func CRed(a, q uint64) uint64 {
+	MUL_COUNT += 1
 	if a >= q {
 		return a - q
 	}
-	MUL_COUNT += 1
 	return a
 }

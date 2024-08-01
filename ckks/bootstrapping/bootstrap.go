@@ -41,13 +41,13 @@ func (btp *Bootstrapper) Bootstrapp(ctIn *ckks.Ciphertext) (ctOut *ckks.Cipherte
 		btp.ScaleUp(ctOut, math.Round(btp.q0OverMessageRatio/ctOut.Scale), ctOut)
 	}
 
+	mul_cnt = ring.MUL_COUNT
 	// Scales the message to Q0/|m|, which is the maximum possible before ModRaise to avoid plaintext overflow.
 	if math.Round((btp.params.QiFloat64(0)/btp.evalModPoly.MessageRatio())/ctOut.Scale) > 1 {
 		btp.ScaleUp(ctOut, math.Round((btp.params.QiFloat64(0)/btp.evalModPoly.MessageRatio())/ctOut.Scale), ctOut)
 	}
 
 	// Step 1 : Extend the basis from q to Q
-	mul_cnt = ring.MUL_COUNT
 	ctOut = btp.modUpFromQ0(ctOut)
 
 	// Scale the message from Q0/|m| to QL/|m|, where QL is the largest modulus used during the bootstrapping.
