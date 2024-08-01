@@ -20,11 +20,11 @@ func (btp *Bootstrapper) Bootstrapp(ct *Ciphertext) *Ciphertext {
 	}
 
 	// Brings the ciphertext scale to Q0/2^{10}
+	mul_cnt = ring.MUL_COUNT
 	btp.evaluator.ScaleUp(ct, math.Round(btp.prescale/ct.Scale()), ct)
 
 	// ModUp ct_{Q_0} -> ct_{Q_L}
 	//t = time.Now()
-	mul_cnt = ring.MUL_COUNT
 	ct = btp.modUp(ct)
 	//log.Println("After ModUp  :", time.Now().Sub(t), ct.Level(), ct.Scale())
 
