@@ -13,8 +13,8 @@ import (
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
 	"github.com/tuneinsight/lattigo/v5/he/hefloat"
 	"github.com/tuneinsight/lattigo/v5/he/hefloat/bootstrapping"
-	"github.com/tuneinsight/lattigo/v5/ring"
-	"github.com/tuneinsight/lattigo/v5/utils"
+	//"github.com/tuneinsight/lattigo/v5/ring"
+	//"github.com/tuneinsight/lattigo/v5/utils"
 	"github.com/tuneinsight/lattigo/v5/utils/sampling"
 )
 
@@ -40,7 +40,7 @@ func main() {
 	// The residual parameters are the parameters used outside of the bootstrapping circuit.
 	// For this example, we have a LogN=16, logQ = 55 + 10*40 and logP = 3*61, so LogQP = 638.
 	// With LogN=16, LogQP=638 and H=192, these parameters achieve well over 128-bit of security.
-	params, err := hefloat.NewParametersFromLiteral(hefloat.ParametersLiteral{
+	/*params, err := hefloat.NewParametersFromLiteral(hefloat.ParametersLiteral{
 		LogN:            LogN,                                              // Log2 of the ring degree
 		LogQ:            []int{55, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40}, // Log2 of the ciphertext prime moduli
 		LogP:            []int{61, 61, 61},                                 // Log2 of the key-switch auxiliary prime moduli
@@ -50,7 +50,7 @@ func main() {
 
 	if err != nil {
 		panic(err)
-	}
+	}*/
 
 	//==========================================
 	//=== 2) BOOTSTRAPPING PARAMETERSLITERAL ===
@@ -69,7 +69,7 @@ func main() {
 	// Thus we expect the bootstrapping to give a precision of 27.25 bits with H=192 (and 23.8 with H=N/2)
 	// if the plaintext values are uniformly distributed in [-1, 1] for both the real and imaginary part.
 	// See `he/float/bootstrapping/parameters_literal.go` for detailed information about the optional fields.
-	btpParametersLit := bootstrapping.ParametersLiteral{
+	/*btpParametersLit := bootstrapping.ParametersLiteral{
 		// We specify LogN to ensure that both the residual parameters and the bootstrapping parameters
 		// have the same LogN. This is not required, but we want it for this example.
 		LogN: utils.Pointy(LogN),
@@ -81,7 +81,7 @@ func main() {
 		// In this example we manually specify the bootstrapping parameters' secret distribution.
 		// This is not necessary, but we ensure here that they are the same as the residual parameters.
 		Xs: params.Xs(),
-	}
+	}*/
 
 	//===================================
 	//=== 3) BOOTSTRAPPING PARAMETERS ===
@@ -93,7 +93,7 @@ func main() {
 	// ring used by the bootstrapping circuit.
 	// The bootstrapping parameters are a wrapper of hefloat.Parameters, with additional information.
 	// They therefore has the same API as the hefloat.Parameters and we can use this API to print some information.
-	btpParams, err := bootstrapping.NewParametersFromLiteral(params, btpParametersLit)
+	/*btpParams, err := bootstrapping.NewParametersFromLiteral(params, btpParametersLit)
 	if err != nil {
 		panic(err)
 	}
@@ -101,6 +101,17 @@ func main() {
 	if *flagShort {
 		// Corrects the message ratio Q0/|m(X)| to take into account the smaller number of slots and keep the same precision
 		btpParams.Mod1ParametersLiteral.LogMessageRatio += 16 - params.LogN()
+	}*/
+	paramSet := bootstrapping.DefaultParametersSparse[0] // bootstrapping.DefaultParametersDense[0]
+	params, err := hefloat.NewParametersFromLiteral(paramSet.SchemeParams)
+	if err != nil {
+		panic(err)
+	}
+	btpParametersLit := paramSet.BootstrappingParams
+
+	btpParams, err := bootstrapping.NewParametersFromLiteral(params, btpParametersLit)
+	if err != nil {
+		panic(err)
 	}
 
 	// We print some information about the residual parameters.
