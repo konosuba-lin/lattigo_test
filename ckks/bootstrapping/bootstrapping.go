@@ -15,6 +15,7 @@ import (
 func (btp *Bootstrapper) Bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext) {
 	var mul_cnt int
 	ctOut = ctIn.CopyNew()
+	mul_cnt = ring.MUL_COUNT
 
 	// Drops the level to 1
 	for ctOut.Level() > 1 {
@@ -48,7 +49,6 @@ func (btp *Bootstrapper) Bootstrap(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertex
 	}
 
 	// Step 1 : Extend the basis from q to Q
-	mul_cnt = ring.MUL_COUNT
 	ctOut = btp.modUpFromQ0(ctOut)
 
 	// Scale the message from Q0/|m| to QL/|m|, where QL is the largest modulus used during the bootstrapping.
