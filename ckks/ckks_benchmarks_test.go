@@ -7,6 +7,7 @@ import (
 	"github.com/ldsec/lattigo/v2/ring"
 	"github.com/ldsec/lattigo/v2/rlwe"
 	"github.com/ldsec/lattigo/v2/utils"
+	"fmt"
 )
 
 func BenchmarkCKKSScheme(b *testing.B) {
@@ -31,12 +32,12 @@ func BenchmarkCKKSScheme(b *testing.B) {
 			panic(err)
 		}
 
-		benchEncoder(testContext, b)
-		benchKeyGen(testContext, b)
-		benchEncrypt(testContext, b)
-		benchDecrypt(testContext, b)
+		//benchEncoder(testContext, b)
+		//benchKeyGen(testContext, b)
+		//benchEncrypt(testContext, b)
+		//benchDecrypt(testContext, b)
 		benchEvaluator(testContext, b)
-		benchInnerSum(testContext, b)
+		//benchInnerSum(testContext, b)
 	}
 }
 
@@ -147,7 +148,7 @@ func benchDecrypt(testContext *testParams, b *testing.B) {
 
 func benchEvaluator(testContext *testParams, b *testing.B) {
 
-	plaintext := NewPlaintext(testContext.params, testContext.params.MaxLevel(), testContext.params.Scale())
+	//plaintext := NewPlaintext(testContext.params, testContext.params.MaxLevel(), testContext.params.Scale())
 	ciphertext1 := NewCiphertextRandom(testContext.prng, testContext.params, 1, testContext.params.MaxLevel(), testContext.params.Scale())
 	ciphertext2 := NewCiphertextRandom(testContext.prng, testContext.params, 1, testContext.params.MaxLevel(), testContext.params.Scale())
 	receiver := NewCiphertextRandom(testContext.prng, testContext.params, 2, testContext.params.MaxLevel(), testContext.params.Scale())
@@ -161,7 +162,7 @@ func benchEvaluator(testContext *testParams, b *testing.B) {
 
 	eval := testContext.evaluator.WithKey(rlwe.EvaluationKey{Rlk: rlk, Rtks: rotkey})
 
-	b.Run(GetTestName(testContext.params, "Evaluator/Add/"), func(b *testing.B) {
+	/*b.Run(GetTestName(testContext.params, "Evaluator/Add/"), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			eval.Add(ciphertext1, ciphertext2, ciphertext1)
 		}
@@ -255,6 +256,14 @@ func benchEvaluator(testContext *testParams, b *testing.B) {
 
 		for i := 0; i < b.N; i++ {
 			eval.Rotate(ciphertext1, 1, ciphertext1)
+		}
+	})*/
+	var mul_cnt int
+	b.Run(GetTestName(testContext.params, "Evaluator/MulRelin/"), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			mul_cnt = ring.MUL_COUNT
+			eval.MulRelin(ciphertext1, ciphertext2, receiver)
+			fmt.Printf("MulRelin: %d\n",ring.MUL_COUNT-mul_cnt)
 		}
 	})
 }
