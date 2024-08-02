@@ -30,7 +30,6 @@ import (
 // 4) EvalMod: homomorphic modular reduction
 // 5) SlotsToCoeffs: homomorphic decoding
 func (eval Evaluator) Evaluate(ctIn *rlwe.Ciphertext) (ctOut *rlwe.Ciphertext, err error) {
-
 	if eval.IterationsParameters == nil && eval.ResidualParameters.PrecisionMode() != ckks.PREC128 {
 		ctOut, _, err = eval.bootstrap(ctIn)
 		return

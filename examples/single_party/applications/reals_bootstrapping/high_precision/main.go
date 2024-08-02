@@ -57,9 +57,9 @@ func main() {
 	// With LogN=16, LogQP=638 and H=192, these parameters achieve well over 128-bit of security.
 	params, err := hefloat.NewParametersFromLiteral(hefloat.ParametersLiteral{
 		LogN:            LogN,              // Log2 of the ring degree
-		LogQ:            []int{60, 45},     // Log2 of the ciphertext prime moduli
+		LogQ:            []int{60, 45, 45, 45, 45, 45, 45, 45, 45},     // Log2 of the ciphertext prime moduli
 		LogP:            []int{61, 61, 61}, // Log2 of the key-switch auxiliary prime moduli
-		LogDefaultScale: 90,                // Log2 of the scale
+		LogDefaultScale: 70,                // Log2 of the scale
 		Xs:              ring.Ternary{H: 192},
 	})
 
@@ -105,7 +105,7 @@ func main() {
 		// to LogScale - LogN/2. Here 27.5+25+25+5 = 82.5 (for the insecure parameters with LogN=13, with
 		// the secure parameters using LogN=16 achieve 82.5 - (16-13)/2 = 81 bits of precision).
 		IterationsParameters: &bootstrapping.IterationsParameters{
-			BootstrappingPrecision: []float64{25, 25, 5},
+			BootstrappingPrecision: []float64{25},
 			ReservedPrimeBitSize:   28,
 		},
 
@@ -179,6 +179,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Done")
+	fmt.Printf("Total Btp Key Size (GB): %f\n", float64(evk.BinarySize())/float64(1000000000))
 
 	//========================
 	//=== 5) BOOTSTRAPPING ===

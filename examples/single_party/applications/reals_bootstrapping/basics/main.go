@@ -13,8 +13,8 @@ import (
 	"github.com/tuneinsight/lattigo/v5/core/rlwe"
 	"github.com/tuneinsight/lattigo/v5/he/hefloat"
 	"github.com/tuneinsight/lattigo/v5/he/hefloat/bootstrapping"
-	//"github.com/tuneinsight/lattigo/v5/ring"
-	//"github.com/tuneinsight/lattigo/v5/utils"
+	"github.com/tuneinsight/lattigo/v5/ring"
+	"github.com/tuneinsight/lattigo/v5/utils"
 	"github.com/tuneinsight/lattigo/v5/utils/sampling"
 )
 
@@ -102,12 +102,31 @@ func main() {
 		// Corrects the message ratio Q0/|m(X)| to take into account the smaller number of slots and keep the same precision
 		btpParams.Mod1ParametersLiteral.LogMessageRatio += 16 - params.LogN()
 	}*/
-	paramSet := bootstrapping.DefaultParametersSparse[0] // bootstrapping.DefaultParametersDense[0]
+	/*paramSet := bootstrapping.DefaultParametersSparse[0] // bootstrapping.DefaultParametersDense[0]
 	params, err := hefloat.NewParametersFromLiteral(paramSet.SchemeParams)
 	if err != nil {
 		panic(err)
 	}
-	btpParametersLit := paramSet.BootstrappingParams
+	btpParametersLit := paramSet.BootstrappingParams*/
+	LogN = 17
+	SchemeParams := hefloat.ParametersLiteral{
+		LogN:            17,
+		LogQ:            []int{60, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45},
+		LogP:            []int{61, 61, 61, 61, 61, 61, 61},
+		Xs:              ring.Ternary{H: 192},
+		LogDefaultScale: 45,
+	}
+	params, err := hefloat.NewParametersFromLiteral(SchemeParams)
+	if err != nil {
+		panic(err)
+	}
+	btpParametersLit := bootstrapping.ParametersLiteral{
+		LogN: utils.Pointy(LogN),
+		SlotsToCoeffsFactorizationDepthAndLogScales: [][]int{{42}, {42}, {42}, {42}, {42}},
+		CoeffsToSlotsFactorizationDepthAndLogScales: [][]int{{58}, {58}, {58}, {58}, {58}, {58}},
+		LogMessageRatio: utils.Pointy(2),
+		Mod1InvDegree:   utils.Pointy(7),
+	}
 
 	btpParams, err := bootstrapping.NewParametersFromLiteral(params, btpParametersLit)
 	if err != nil {
