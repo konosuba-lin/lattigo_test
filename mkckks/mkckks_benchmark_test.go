@@ -3,15 +3,14 @@ package mkckks
 import (
 	"strconv"
 	"testing"
-	"fmt"
+
 	"github.com/ldsec/lattigo/v2/ckks"
-	"github.com/ldsec/lattigo/v2/ring"
 	"github.com/ldsec/lattigo/v2/mkrlwe"
 )
 
 func BenchmarkMKCKKS(b *testing.B) {
 
-	defaultParams := ckks.DefaultParams
+	defaultParams := []ckks.ParametersLiteral{PN14QP439, PN15QP880}
 
 	for _, defaultParam := range defaultParams {
 		ckksParams, err := ckks.NewParametersFromLiteral(defaultParam)
@@ -56,7 +55,7 @@ func BenchmarkMKCKKS(b *testing.B) {
 }
 
 func benchMulAndRelin(testContext *testParams, userList []string, b *testing.B) {
-	var mul_cnt int
+
 	numUsers := len(userList)
 	msgList := make([]*Message, numUsers)
 	ctList := make([]*Ciphertext, numUsers)
@@ -78,9 +77,7 @@ func benchMulAndRelin(testContext *testParams, userList []string, b *testing.B) 
 
 	b.Run(GetTestName(testContext.params, "MKMulAndRelin: "+strconv.Itoa(numUsers)+"/ "), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			mul_cnt = ring.MUL_COUNT
 			eval.MulRelinNew(ct0, ct1, rlkSet)
-			fmt.Printf("MKMulAndRelin %d\n",ring.MUL_COUNT-mul_cnt)
 		}
 
 	})
