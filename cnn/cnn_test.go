@@ -14,8 +14,8 @@ import (
 	"github.com/ldsec/lattigo/v2/rlwe"
 	"github.com/ldsec/lattigo/v2/utils"
 
-	"mk-lattigo/mkckks"
-	"mk-lattigo/mkrlwe"
+	"github.com/ldsec/lattigo/v2/mkckks"
+	"github.com/ldsec/lattigo/v2/mkrlwe"
 )
 
 var (
@@ -149,17 +149,20 @@ func TestCNN(t *testing.T) {
 	ptMask := testContext.encryptor.EncodeMsgNew(msg)
 
 	// Evaluation
+	var mul_cnt int
+	mul_cnt = ring.MUL_COUNT
 	convOut := Convolution(eval, rlkSet, rtkSet, ctImage, ctImageHoisted, ctKernels, ctKernelsHoisted)
-
+	
 	convOutHoisted := eval.HoistedForm(convOut)
 	square1Out := eval.MulRelinHoistedNew(convOut, convOut, convOutHoisted, convOutHoisted, rlkSet)
 	square1OutHoisted := eval.HoistedForm(square1Out)
-
+	
 	fc1Out := FC1Layer(eval, rlkSet, rtkSet, square1Out, square1OutHoisted, ctFC1, ctFC1Hoisted, ctB1)
 	fc1OutHoisted := eval.HoistedForm(fc1Out)
 	square2Out := eval.MulRelinHoistedNew(fc1Out, fc1Out, fc1OutHoisted, fc1OutHoisted, rlkSet)
-
+	
 	fc2Out := FC2Layer(eval, rlkSet, rtkSet, square2Out, ctFC2, ctB2, ptMask)
+	fmt.Printf("cnn evaluation mul count = %d\n",ring.MUL_COUNT-mul_cnt)
 
 	// Decrypt
 	ptResult := testContext.decryptor.Decrypt(fc2Out, testContext.skSet)
@@ -192,7 +195,7 @@ func genTestParams(defaultParam mkckks.Parameters, idset *mkrlwe.IDSet) (testCon
 
 	testContext.skSet = mkrlwe.NewSecretKeySet()
 	testContext.pkSet = mkrlwe.NewPublicKeyKeySet()
-	testContext.rlkSet = mkrlwe.NewRelinearizationKeyKeySet()
+	testContext.rlkSet = mkrlwe.NewRelinearizationKeyKeySet(defaultParam.Parameters)
 	testContext.rtkSet = mkrlwe.NewRotationKeySet()
 
 	for i := 0; i < testContext.params.LogN()-1; i++ {
@@ -259,7 +262,7 @@ func readTestData(filename string) {
 	for i, l := range lines {
 		values := strings.Split(l, ",")
 		for j, v := range values {
-			value, error := strconv.ParseFloat(v, 64)
+			value, error := strconv.ParseFloat(strings.TrimSpace(strings.TrimSuffix(v, "\r")), 64)
 
 			if error != nil {
 				panic(error)
@@ -291,7 +294,7 @@ func readKData(filename string) {
 	for i, l := range lines {
 		values := strings.Split(l, " ")
 		for j, v := range values {
-			value, error := strconv.ParseFloat(v, 64)
+			value, error := strconv.ParseFloat(strings.TrimSpace(strings.TrimSuffix(v, "\r")), 64)
 			if error != nil {
 				panic(error)
 			}
@@ -315,7 +318,7 @@ func readFCData(filename string, insize int, outsize int) (FCData [][]complex128
 	for i, l := range lines {
 		values := strings.Split(l, " ")
 		for j, v := range values {
-			value, error := strconv.ParseFloat(v, 64)
+			value, error := strconv.ParseFloat(strings.TrimSpace(strings.TrimSuffix(v, "\r")), 64)
 			if error != nil {
 				panic(error)
 			}
@@ -336,7 +339,7 @@ func readBData(filename string, size int) (BData []complex128) {
 
 	line := strings.Split(string(f), " ")
 	for i, v := range line {
-		value, error := strconv.ParseFloat(v, 64)
+		value, error := strconv.ParseFloat(strings.TrimSpace(strings.TrimSuffix(v, "\r")), 64)
 		if error != nil {
 			panic(error)
 		}
