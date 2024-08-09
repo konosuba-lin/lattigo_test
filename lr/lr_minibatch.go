@@ -21,7 +21,7 @@ import (
 var (
 	numData    = 2000
 	numFeature = 20
-	numCompany = 4
+	numCompany = 8
 
 	numTrain  = 512
 	batchSize = 128
@@ -308,16 +308,18 @@ func main() {
 
 	fmt.Println()
 	fmt.Println("Training...")
-	start := time.Now()
 	//for a := 0; a < numIter; a++ {
+	var mul_cnt int
 	for a := 0; a < 3; a++ {
 		fmt.Println()
 		fmt.Println(a, "-th Iteration")
 		batchId := a % numBatch
-
+		
 		g_acc := testContext.encryptor.EncryptMsgNew(zero_msg, testContext.pkSet.GetPublicKey(id))
 		u_acc := testContext.encryptor.EncryptMsgNew(zero_msg, testContext.pkSet.GetPublicKey(id))
-
+		
+		mul_cnt = ring.MUL_COUNT
+		start := time.Now()
 		for ctId := 0; ctId < numCtPerBatch; ctId++ {
 			//////////////////////////// depth 1 //////////////////////////////////
 			// M_j = Z_j * V_j
@@ -376,24 +378,27 @@ func main() {
 
 		v = v_update
 		beta = beta_update
-
+		fmt.Printf("Epoch count: %d\n",ring.MUL_COUNT-mul_cnt)
+		end := time.Now()
+		elapsed := end.Sub(start)
+		fmt.Println("Epoch Time:", elapsed)
+		
 		fmt.Printf("beta: ")
 		beta_decrypt := testContext.decryptor.Decrypt(beta, testContext.skSet)
 		fmt.Println(beta_decrypt.Value[0:2])
-
+		
 		fmt.Printf("v: ")
 		v_decrypt := testContext.decryptor.Decrypt(v, testContext.skSet)
 		fmt.Println(v_decrypt.Value[0:2])
+
 	}
-	end := time.Now()
-	elapsed := end.Sub(start)
-	fmt.Println("Training Time:", elapsed)
+	
 
 	// Inference in depth 3
 	fmt.Println()
 	fmt.Println("Inference...")
 	correct := 0
-	for i := 0; i < numData; i++ {
+	for i := numTrain; i < 2*numTrain; i++ {
 		if i%100 == 0 {
 			fmt.Println(i, "-th Data Inferenced")
 		}
